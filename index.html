@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HDFC Gold Loan (Demo)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="container topbar__inner">
+          <a class="brand" href="#/">
+            <span class="brand__mark" aria-hidden="true">HDFC</span>
+            <span class="brand__name">Gold Loan</span>
+            <span class="brand__badge">Demo</span>
+          </a>
+          <nav class="nav">
+            <a class="nav__link" href="#/">Home</a>
+            <a class="nav__link" href="#/apply">Apply</a>
+            <a class="nav__link" href="#/calculator">EMI Calculator</a>
+          </nav>
+          <button class="btn btn--primary" id="openChatBtn" type="button">
+            Chat support
+          </button>
+        </div>
+      </header>
+
+      <main class="container" id="routeRoot"></main>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div class="muted">
+            This is a demo UI. Replace branding/assets with official ones if needed.
+          </div>
+          <div class="muted">© <span id="year"></span> Gold Loan</div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="chat" id="chat" aria-hidden="true">
+      <div class="chat__overlay" id="chatOverlay"></div>
+      <section class="chat__panel" role="dialog" aria-label="Gold Loan Chat">
+        <header class="chat__header">
+          <div>
+            <div class="chat__title">Gold Loan Assistant</div>
+            <div class="chat__subtitle">Ask about rates, process, charges, timeline</div>
+          </div>
+          <button class="iconbtn" id="closeChatBtn" type="button" aria-label="Close chat">
+            ✕
+          </button>
+        </header>
+        <div class="chat__body" id="chatBody"></div>
+        <form class="chat__composer" id="chatForm">
+          <input
+            class="chat__input"
+            id="chatInput"
+            type="text"
+            placeholder="Type your question…"
+            autocomplete="off"
+          />
+          <button class="btn btn--primary" type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
+

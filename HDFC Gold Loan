@@ -1,0 +1,9 @@
+cd "C:\Users\abhinandan.unawane\Downloads\HDFC Gold Loan"
+
+git init
+git remote add origin https://github.com/abhinandanunawane/HDFC.git
+git pull origin main   # bring in existing README
+git add .
+git commit -m "Add gold loan demo UI"
+git branch -M main
+git push -u origin main

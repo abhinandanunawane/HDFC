@@ -1,9 +1,13 @@
 import { storage } from "../lib/storage.js";
 import { el, toast } from "../lib/dom.js";
 import { inr, clamp } from "../lib/format.js";
+import { refreshGoldPriceFromApiIfPossible } from "../lib/goldApi.js";
 
 export function renderHome(root) {
   const s = storage.load();
+  refreshGoldPriceFromApiIfPossible().then(() => {
+    // After API updates, this page can be revisited or refreshed to see the new rate.
+  });
 
   const hero = el("section", { class: "hero" }, [
     el("div", { class: "hero__banner" }, [
@@ -61,21 +65,16 @@ export function renderHome(root) {
           text: "These are used for the gold estimation step. Update to match current market price / policy for a realistic demo.",
         }),
         el("div", { class: "form" }, [
-          el("label", {}, [
-            "24K Gold price per gram (₹)",
-            el("input", {
-              type: "number",
-              min: "1",
-              step: "1",
-              value: String(s.goldPricePerGram24k),
-              onInput: (e) => {
-                const v = clamp(Number(e.target.value || 0), 1, 200000);
-                storage.update((st) => {
-                  st.goldPricePerGram24k = v;
-                  return st;
-                });
-              },
-            }),
+          el("div", { class: "statgrid" }, [
+            stat("24K price (per gram)", inr(s.goldPricePerGram24k)),
+            stat("22K price (per gram)", inr(Math.round(s.goldPricePerGram24k * (22 / 24)))),
+            stat("20K price (per gram)", inr(Math.round(s.goldPricePerGram24k * (20 / 24)))),
+            stat("18K price (per gram)", inr(Math.round(s.goldPricePerGram24k * (18 / 24)))),
+          ]),
+          el("div", { class: "muted" }, [
+            s.goldApi?.source === "goldpricez"
+              ? `Updated automatically from gold API on ${s.goldApi.lastUpdatedDate || "latest"}`
+              : "Currently using manual demo value bundled with the app. Configure API key in code to fetch live rates.",
           ]),
           el("label", {}, [
             "Loan-to-value (LTV) %",

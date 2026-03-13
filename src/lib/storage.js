@@ -3,6 +3,10 @@ const KEY = "hdfc_gold_loan_demo_v1";
 const defaults = {
   goldPricePerGram24k: 7000, // demo default; can be changed in UI (Home/Apply)
   loanToValuePct: 75,
+  goldApi: {
+    lastUpdatedDate: null,
+    source: "manual",
+  },
   chat: {
     messages: [],
     state: {

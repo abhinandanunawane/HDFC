@@ -16,18 +16,21 @@ export function renderApply(root) {
     el("div", { class: "hero__banner" }, [
       el("div", { class: "hero__row" }, [
         el("div", {}, [
-          el("h1", { class: "hero__headline", text: "Apply for Gold Loan (Demo)" }),
+          el("h1", {
+            class: "hero__headline",
+            text: "Start your HDFC Gold Loan journey – fully guided online",
+          }),
           el("div", {
             class: "muted",
-            text: "Complete the 4 steps. The final estimation uses current gold price and 75% LTV (configurable).",
+            text: "Share a few details, upload gold photos, and get an instant, HDFC-style indicative gold loan estimate – in just four simple steps.",
           }),
         ]),
         el("div", { style: "min-width:260px; flex:0 0 auto" }, [
-          el("div", { class: "muted", text: "24K price (demo)" }),
+          el("div", { class: "muted", text: "24K indicative price (demo)" }),
           el("div", { class: "calc__value", text: inr(s.goldPricePerGram24k) + " / gram" }),
           el("div", { style: "height:10px" }),
           el("a", { class: "btn", href: "#/", style: "display:inline-block; width:100%; text-align:center" }, [
-            "Update demo settings",
+            "View gold rate source",
           ]),
         ]),
       ]),
@@ -133,12 +136,17 @@ export function renderApply(root) {
   function renderStep0(inner) {
     const s2 = storage.load();
     const fin = s2.application.financial;
-    inner.appendChild(el("h2", { class: "card__title", text: "Step 1 — Financial details" }));
-    inner.appendChild(el("p", { class: "card__subtitle", text: "Provide basic information to calculate initial eligibility (demo)." }));
+    inner.appendChild(el("h2", { class: "card__title", text: "Step 1 — Tell us about yourself & your gold" }));
+    inner.appendChild(
+      el("p", {
+        class: "card__subtitle",
+        text: "Share your city, income and the gold you wish to pledge so we can estimate a comfortable, HDFC-style gold loan amount.",
+      })
+    );
 
     const form = el("div", { class: "form" }, [
       el("div", { class: "row" }, [
-        labelInput("City", fin.city, (v) => setFin({ city: v })),
+        labelInput("City (where you prefer to avail the loan)", fin.city, (v) => setFin({ city: v })),
         labelSelect(
           "Employment",
           fin.employment,
@@ -147,17 +155,17 @@ export function renderApply(root) {
         ),
       ]),
       el("div", { class: "row" }, [
-        labelInput("Monthly income (₹)", fin.monthlyIncome, (v) => setFin({ monthlyIncome: digitsOnly(v) })),
-        labelInput("Requested loan amount (₹)", fin.requestedAmount, (v) => setFin({ requestedAmount: digitsOnly(v) })),
+        labelInput("Approximate monthly income (₹)", fin.monthlyIncome, (v) => setFin({ monthlyIncome: digitsOnly(v) })),
+        labelInput("Desired gold loan amount (₹)", fin.requestedAmount, (v) => setFin({ requestedAmount: digitsOnly(v) })),
       ]),
       el("div", { class: "row" }, [
-        labelInput("Gold weight (grams)", fin.goldWeightGrams, (v) => setFin({ goldWeightGrams: digitsDot(v) })),
-        labelSelect("Purity (Karat)", String(fin.purityKarat), ["24", "22", "20", "18"], (v) =>
+        labelInput("Total gold weight you wish to pledge (grams)", fin.goldWeightGrams, (v) => setFin({ goldWeightGrams: digitsDot(v) })),
+        labelSelect("Purity (karat)", String(fin.purityKarat), ["24", "22", "20", "18"], (v) =>
           setFin({ purityKarat: Number(v) })
         ),
       ]),
       el("label", {}, [
-        "Requested tenure (months)",
+        "Preferred tenure (months)",
         el("input", {
           type: "range",
           min: "3",
@@ -166,7 +174,10 @@ export function renderApply(root) {
           value: String(fin.requestedTenureMonths ?? 12),
           onInput: (e) => setFin({ requestedTenureMonths: Number(e.target.value) }),
         }),
-        el("div", { class: "muted", text: `${fin.requestedTenureMonths ?? 12} months` }),
+        el("div", {
+          class: "muted",
+          text: `${fin.requestedTenureMonths ?? 12} months — you can refine EMIs later in the planner.`,
+        }),
       ]),
     ]);
 
@@ -183,21 +194,21 @@ export function renderApply(root) {
   function renderStep1(inner) {
     const s2 = storage.load();
     const ekyc = s2.application.ekyc;
-    inner.appendChild(el("h2", { class: "card__title", text: "Step 2 — eKYC" }));
+    inner.appendChild(el("h2", { class: "card__title", text: "Step 2 — eKYC details (demo)" }));
     inner.appendChild(
       el("p", {
         class: "card__subtitle",
-        text: "Enter KYC details (demo). In production, do this via secure eKYC providers and consent flows.",
+        text: "Capture key KYC information required for a real-world HDFC Gold Loan journey. In live systems, this would be powered by secure eKYC partners and consent-based flows.",
       })
     );
 
     const form = el("div", { class: "form" }, [
       el("div", { class: "row" }, [
         labelSelect("ID type", ekyc.idType, ["Aadhaar", "PAN", "Passport", "Driving License"], (v) => setKyc({ idType: v })),
-        labelInput("ID number", ekyc.idNumber, (v) => setKyc({ idNumber: v.trim() })),
+        labelInput("ID number (as per document)", ekyc.idNumber, (v) => setKyc({ idNumber: v.trim() })),
       ]),
       el("label", {}, [
-        "Address",
+        "Current residential address (as per KYC)",
         el("textarea", {
           value: ekyc.address,
           onInput: (e) => setKyc({ address: e.target.value }),
@@ -218,21 +229,21 @@ export function renderApply(root) {
   function renderStep2(inner) {
     const s2 = storage.load();
     const gp = s2.application.goldPhotos;
-    inner.appendChild(el("h2", { class: "card__title", text: "Step 3 — Gold pictures & guidelines" }));
+    inner.appendChild(el("h2", { class: "card__title", text: "Step 3 — Upload clear gold photos (demo)" }));
     inner.appendChild(
       el("p", {
         class: "card__subtitle",
-        text: "Upload clear photos so purity/hallmarks/invoice can be verified (demo).",
+        text: "Upload high‑quality images so the team can visually review your gold jewellery, purity marks and invoice before you visit the branch.",
       })
     );
 
     inner.appendChild(el("div", { class: "stat" }, [
-      el("div", { class: "stat__k", text: "Photo guidelines" }),
+      el("div", { class: "stat__k", text: "Gold photo guidelines for faster approval" }),
       el("div", { class: "muted", style: "margin-top:6px" }, [
-        el("div", { text: "1) Take 3–4 angles: front, back, side, clasp/chain." }),
-        el("div", { text: "2) Take a close-up of the hallmark stamp (very clear)." }),
-        el("div", { text: "3) Use good lighting, plain background, no blur, no filters." }),
-        el("div", { text: "4) Include the invoice image if available." }),
+        el("div", { text: "1) Capture 3–4 angles of each ornament – front, back, side and clasp/chain if applicable." }),
+        el("div", { text: "2) Take a close-up photo of the hallmark purity stamp and any HUID / BIS marks – make sure they are sharp." }),
+        el("div", { text: "3) Use good daylight or bright white light, with a plain background and no blur or filters." }),
+        el("div", { text: "4) Add a clear photo of the original invoice (if available) for faster assessment." }),
       ]),
     ]));
 
@@ -252,9 +263,9 @@ export function renderApply(root) {
     });
 
     const form = el("div", { class: "form" }, [
-      el("label", {}, ["Upload gold images", fileInput]),
+      el("label", {}, ["Upload gold jewellery images", fileInput]),
       el("label", {}, [
-        el("span", { text: "Invoice provided?" }),
+        el("span", { text: "Gold purchase invoice available?" }),
         el("select", {
           onChange: (e) => setGoldPhotos({ invoiceProvided: e.target.value === "Yes" }),
         }, [
@@ -263,7 +274,7 @@ export function renderApply(root) {
         ]),
       ]),
       el("label", {}, [
-        "Notes (optional)",
+        "Any special notes (optional – design, making, brand, etc.)",
         el("textarea", { value: gp.notes, onInput: (e) => setGoldPhotos({ notes: e.target.value }) }),
       ]),
     ]);
@@ -271,18 +282,18 @@ export function renderApply(root) {
 
     const fileList = (gp.files?.length ?? 0)
       ? el("div", { class: "stat", style: "margin-top:12px" }, [
-          el("div", { class: "stat__k", text: "Selected files" }),
+          el("div", { class: "stat__k", text: "Selected gold photos" }),
           el("div", { class: "muted", style: "margin-top:6px" }, [
             ...gp.files.map((f) => el("div", { text: `- ${f.name}` })),
           ]),
         ])
-      : el("div", { class: "muted", style: "margin-top:10px", text: "No images selected yet." });
+      : el("div", { class: "muted", style: "margin-top:10px", text: "No images selected yet. Upload at least 3 clear images to continue." });
     inner.appendChild(fileList);
 
     const act = actions({
       canPrev: true,
       canNext: isStep2Valid(storage.load()),
-      nextLabel: "Get estimation",
+      nextLabel: "Review gold loan estimate",
     });
     const btns = act.querySelectorAll("button");
     if (btns[1]) btns[1].dataset.step = "2-next";
@@ -295,15 +306,20 @@ export function renderApply(root) {
     const ekyc = s2.application.ekyc;
     const gp = s2.application.goldPhotos;
 
-    inner.appendChild(el("h2", { class: "card__title", text: "Step 4 — Estimation" }));
-    inner.appendChild(el("p", { class: "card__subtitle", text: "We verify details (demo) and calculate eligible loan amount." }));
+    inner.appendChild(el("h2", { class: "card__title", text: "Step 4 — Your indicative HDFC Gold Loan estimate" }));
+    inner.appendChild(
+      el("p", {
+        class: "card__subtitle",
+        text: "Based on your gold details, purity and demo price, here is an indicative gold value and the loan amount you could be eligible for at the configured LTV.",
+      })
+    );
 
     const checks = [];
-    if (fin.city) checks.push("Financial details captured");
-    if (ekyc.idNumber && ekyc.address) checks.push("eKYC fields completed (demo)");
-    if ((gp.files?.length ?? 0) >= 3) checks.push("Gold photos received (3+ images)");
-    if (gp.invoiceProvided) checks.push("Invoice provided");
-    if (!gp.invoiceProvided) checks.push("Invoice not provided (acceptable in some cases)");
+    if (fin.city) checks.push("City, income and desired loan amount captured.");
+    if (ekyc.idNumber && ekyc.address) checks.push("Key eKYC fields captured (demo only – no real KYC performed).");
+    if ((gp.files?.length ?? 0) >= 3) checks.push("Minimum 3 gold photos uploaded for visual review.");
+    if (gp.invoiceProvided) checks.push("Gold purchase invoice marked as available.");
+    if (!gp.invoiceProvided) checks.push("Invoice marked as not available – may be reviewed at branch discretion.");
 
     const purityFactor = PURITY_FACTOR[Number(fin.purityKarat)] ?? (Number(fin.purityKarat) / 24);
     const weight = Number(fin.goldWeightGrams || 0);
@@ -321,20 +337,20 @@ export function renderApply(root) {
     });
 
     inner.appendChild(el("div", { class: "statgrid" }, [
-      stat("Current 24K gold price", inr(s2.goldPricePerGram24k) + " / gram"),
-      stat("Purity factor used", `${(purityFactor * 100).toFixed(2)}% of 24K`),
-      stat("Evaluated gold value", inr(Math.round(evaluatedValue))),
-      stat(`Eligible loan (${s2.loanToValuePct}% of value)`, inr(Math.round(eligibleLoan))),
+      stat("Current 24K gold price (demo)", inr(s2.goldPricePerGram24k) + " / gram"),
+      stat("Purity factor used for your gold", `${(purityFactor * 100).toFixed(2)}% of 24K`),
+      stat("Indicative evaluated gold value", inr(Math.round(evaluatedValue))),
+      stat(`Indicative eligible loan (${s2.loanToValuePct}% of value)`, inr(Math.round(eligibleLoan))),
     ]));
 
     inner.appendChild(el("div", { class: "hr" }));
-    inner.appendChild(el("div", { class: "muted", text: "Verification checks" }));
+    inner.appendChild(el("div", { class: "muted", text: "Checks covered in this demo journey" }));
     inner.appendChild(el("div", { class: "form" }, checks.map((c) => el("div", { class: "muted", text: `- ${c}` }))));
 
     inner.appendChild(el("div", { class: "hr" }));
     inner.appendChild(
       el("div", { class: "actions" }, [
-        el("button", { class: "btn", type: "button", onClick: () => setStep(2) }, ["Previous"]),
+        el("button", { class: "btn", type: "button", onClick: () => setStep(2) }, ["Back to photos"]),
         el(
           "button",
           {
@@ -348,7 +364,7 @@ export function renderApply(root) {
               location.hash = "#/calculator";
             },
           },
-          ["Calculate EMI"]
+          ["Plan EMIs for this estimate"]
         ),
       ])
     );

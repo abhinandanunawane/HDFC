@@ -280,9 +280,9 @@ export function createChat({ openBtn, closeBtn, overlay, panel, body, form, inpu
   if (!s.chat.messages.length) {
     sendBot(
       body,
-      "Hi! I’m your Gold Loan Assistant.\nAsk me about interest rates, process, charges, timeline, documents, or EMI."
+      "Hi! I’m your HDFC Gold Loan Smart Assistant.\nAsk me anything about online gold loan process, interest rates, eligibility, charges, timelines, documents or EMIs."
     );
-    sendBot(body, "Would you like to start the gold loan process now?", [
+    sendBot(body, "Would you like to get an instant HDFC-style gold loan estimate now?", [
       { label: "Yes, start", onClick: () => handleUserText(body, navigate, "yes") },
       { label: "Not now", onClick: () => handleUserText(body, navigate, "no") },
     ]);

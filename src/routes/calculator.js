@@ -64,10 +64,12 @@ export function renderCalculator(root) {
   const page = el("section", { class: "grid grid--2", style: "padding: 18px 0" }, [
     el("div", { class: "card" }, [
       el("div", { class: "card__inner" }, [
-        el("h2", { class: "card__title", text: "EMI Calculator" }),
+        el("h2", { class: "card__title", text: "Gold Loan EMI Planner" }),
         el("p", {
           class: "card__subtitle",
-          text: "Slide the values to estimate EMI and total interest (demo).",
+          text: lockedFromEstimate
+            ? "Your loan amount is picked from the gold loan estimate. Adjust interest rate and tenure to see easy monthly EMIs."
+            : "Choose a loan amount, interest rate and tenure to simulate HDFC-style gold loan EMIs (demo).",
         }),
         el("div", { class: "calc__grid" }, [
           amountControl,
@@ -100,24 +102,27 @@ export function renderCalculator(root) {
     ]),
     el("div", { class: "card" }, [
       el("div", { class: "card__inner" }, [
-        el("h2", { class: "card__title", text: "Result" }),
-        el("p", { class: "card__subtitle", text: "Approximate monthly EMI (rounded)." }),
-        el("div", { class: "muted", text: "Monthly EMI" }),
+        el("h2", { class: "card__title", text: "Your EMI snapshot" }),
+        el("p", {
+          class: "card__subtitle",
+          text: "Indicative monthly EMI based on your choices. Exact figures depend on final HDFC Gold Loan offer and charges.",
+        }),
+        el("div", { class: "muted", text: "Estimated monthly EMI" }),
         outputEmi,
         el("div", { class: "hr" }),
         el("div", { class: "statgrid" }, [
           el("div", { class: "stat" }, [
-            el("div", { class: "stat__k", text: "Total interest" }),
+            el("div", { class: "stat__k", text: "Indicative total interest" }),
             outputInterest,
           ]),
           el("div", { class: "stat" }, [
-            el("div", { class: "stat__k", text: "Total repayment" }),
+            el("div", { class: "stat__k", text: "Indicative total repayment" }),
             outputTotal,
           ]),
         ]),
         el("div", { class: "hr" }),
         el("div", { class: "muted" }, [
-          "For production accuracy, use lender-specific rate tables, rounding rules, and fee/tax inclusion.",
+          "For live HDFC journeys, connect this planner to product‑wise rate grids, charges and taxes for exact EMI outputs.",
         ]),
       ]),
     ]),

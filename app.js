@@ -4,20 +4,12 @@ import { renderApply } from "./src/routes/apply.js";
 import { renderCalculator } from "./src/routes/calculator.js";
 import { createChat } from "./src/chat/chat.js";
 import { storage } from "./src/lib/storage.js";
-import { refreshGoldRatesIfStale } from "./src/lib/goldRates.js";
 
 const routeRoot = document.getElementById("routeRoot");
 const year = document.getElementById("year");
 year.textContent = String(new Date().getFullYear());
 
 storage.ensureDefaults();
-(async () => {
-  try {
-    await refreshGoldRatesIfStale();
-  } catch {
-    // Non-blocking: demo should still load if API fails.
-  }
-})();
 
 const router = createRouter(routeRoot, {
   "/": renderHome,

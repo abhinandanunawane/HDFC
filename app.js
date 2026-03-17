@@ -11,6 +11,8 @@ const year = document.getElementById("year");
 year.textContent = String(new Date().getFullYear());
 
 storage.ensureDefaults();
+// Start fresh on every full page refresh (no old chat/app data).
+storage.resetSession();
 refreshGoldPriceFromApiIfPossible();
 
 const router = createRouter(routeRoot, {

@@ -101,6 +101,14 @@ export const storage = {
     localStorage.removeItem(KEY);
     return storage.load();
   },
+  resetSession() {
+    // Clear user journey/session data but keep basic config (rates/LTV).
+    storage.update((s) => {
+      s.chat = structuredClone(defaults.chat);
+      s.application = structuredClone(defaults.application);
+      return s;
+    });
+  },
   ensureDefaults() {
     storage.update((s) => s);
   },

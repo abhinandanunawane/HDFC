@@ -377,6 +377,14 @@ input[type="range"]{accent-color: var(--accent)}
   border-radius: 12px;
   cursor:pointer;
 }
+.iconbtn--text{
+  width:auto;
+  padding: 0 12px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .2px;
+}
+.iconbtn:hover{background: rgba(255,255,255,.18)}
 .chat__body{padding:14px; overflow:auto; display:grid; gap:10px}
 .bubble{
   max-width: 92%;

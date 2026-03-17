@@ -35,6 +35,7 @@ const defaults = {
       requestedAmount: "",
       goldWeightGrams: "",
       purityKarat: 22,
+      panCardFile: null,
     },
     ekyc: {
       idType: "Aadhaar",
@@ -44,7 +45,14 @@ const defaults = {
     goldPhotos: {
       files: [],
       invoiceProvided: false,
+      invoiceFile: null,
+      purityCertificateFile: null,
       notes: "",
+    },
+    verification: {
+      status: "idle", // idle | running | done
+      messages: [],
+      startedAt: null,
     },
     estimation: {
       evaluatedValue: 0,

@@ -92,6 +92,62 @@ export function renderApply(root) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  // Verification animation timers (kept in closure to avoid duplicates).
+  let verificationTimers = [];
+  function clearVerificationTimers() {
+    for (const t of verificationTimers) clearTimeout(t);
+    verificationTimers = [];
+  }
+
+  function startVerificationAndGoToEstimate() {
+    clearVerificationTimers();
+    storage.update((st) => {
+      st.application.verification = {
+        status: "running",
+        startedAt: Date.now(),
+        messages: ["Verifying documents..."],
+      };
+      return st;
+    });
+    render();
+
+    // Simulated checks for UX (demo).
+    verificationTimers.push(
+      setTimeout(() => {
+        storage.update((st) => {
+          st.application.verification.messages = [
+            "Verifying documents...",
+            "Running fraud checks...",
+          ];
+          return st;
+        });
+        render();
+      }, 900)
+    );
+    verificationTimers.push(
+      setTimeout(() => {
+        storage.update((st) => {
+          st.application.verification.messages = [
+            "Verifying documents...",
+            "Running fraud checks...",
+            "Finalising eligibility & estimate...",
+          ];
+          return st;
+        });
+        render();
+      }, 1700)
+    );
+    verificationTimers.push(
+      setTimeout(() => {
+        storage.update((st) => {
+          st.application.verification.status = "done";
+          return st;
+        });
+        setStep(3);
+      }, 2600)
+    );
+  }
+
   function actions({ canPrev, canNext, nextLabel = "Next", onNext }) {
     return el("div", { class: "actions" }, [
       el(
@@ -216,6 +272,18 @@ export function renderApply(root) {
         ),
       ]),
       el("label", {}, [
+        "PAN card upload (optional for this demo)",
+        el("input", {
+          type: "file",
+          accept: "image/*,application/pdf",
+          onChange: (e) => {
+            const f = (e.target.files || [])[0];
+            setFin({ panCardFile: f ? { name: f.name, size: f.size, type: f.type } : null });
+            if (f) toast("PAN card selected");
+          },
+        }),
+      ]),
+      el("label", {}, [
         "Preferred tenure (months)",
         el("input", {
           type: "range",
@@ -280,6 +348,26 @@ export function renderApply(root) {
   function renderStep2(inner) {
     const s2 = storage.load();
     const gp = s2.application.goldPhotos;
+    const ver = s2.application.verification;
+
+    if (ver?.status === "running") {
+      inner.appendChild(el("h2", { class: "card__title", text: "Verifying your details (demo)" }));
+      inner.appendChild(el("p", { class: "card__subtitle", text: "Please wait while we validate documents and run quick checks." }));
+      inner.appendChild(
+        el("div", { class: "stat" }, [
+          el("div", { class: "stat__k", text: "Verification status" }),
+          el(
+            "div",
+            { class: "muted", style: "margin-top:8px" },
+            (ver.messages || []).map((m) => el("div", { text: `• ${m}` }))
+          ),
+        ])
+      );
+      inner.appendChild(el("div", { class: "muted", style: "margin-top:10px", text: "Do not refresh this page during verification." }));
+      inner.appendChild(actions({ canPrev: false, canNext: false, nextLabel: "Please wait…" }));
+      return;
+    }
+
     inner.appendChild(el("h2", { class: "card__title", text: "Step 3 — Upload clear gold photos (demo)" }));
     inner.appendChild(
       el("p", {
@@ -323,6 +411,26 @@ export function renderApply(root) {
       },
     });
 
+    const invoiceUpload = el("input", {
+      type: "file",
+      accept: "image/*,application/pdf",
+      onChange: (e) => {
+        const f = (e.target.files || [])[0];
+        setGoldPhotos({ invoiceFile: f ? { name: f.name, size: f.size, type: f.type } : null });
+        if (f) toast("Invoice selected");
+      },
+    });
+
+    const purityCertUpload = el("input", {
+      type: "file",
+      accept: "image/*,application/pdf",
+      onChange: (e) => {
+        const f = (e.target.files || [])[0];
+        setGoldPhotos({ purityCertificateFile: f ? { name: f.name, size: f.size, type: f.type } : null });
+        if (f) toast("Purity certificate selected");
+      },
+    });
+
     const form = el("div", { class: "form" }, [
       el("label", {}, ["Upload gold jewellery images", fileInput]),
       el("label", {}, [
@@ -334,6 +442,8 @@ export function renderApply(root) {
           el("option", { value: "Yes", selected: gp.invoiceProvided ? "selected" : null }, ["Yes"]),
         ]),
       ]),
+      el("label", {}, ["Upload invoice copy (optional)", invoiceUpload]),
+      el("label", {}, ["Upload purity certificate (optional)", purityCertUpload]),
       el("label", {}, [
         "Any special notes (optional – design, making, brand, etc.)",
         el("textarea", { value: gp.notes, onInput: (e) => setGoldPhotos({ notes: e.target.value }) }),
@@ -366,6 +476,7 @@ export function renderApply(root) {
       canPrev: true,
       canNext: isStep2Valid(storage.load()),
       nextLabel: "Review gold loan estimate",
+      onNext: () => startVerificationAndGoToEstimate(),
     });
     const btns = act.querySelectorAll("button");
     if (btns[1]) btns[1].dataset.step = "2-next";
@@ -388,10 +499,13 @@ export function renderApply(root) {
 
     const checks = [];
     if (fin.city) checks.push("City, income and desired loan amount captured.");
+    if (fin.panCardFile) checks.push("PAN card uploaded (demo file capture).");
     if (ekyc.idNumber && ekyc.address) checks.push("Key eKYC fields captured (demo only – no real KYC performed).");
     if ((gp.files?.length ?? 0) >= 3) checks.push("Minimum 3 gold photos uploaded for visual review.");
     if (gp.invoiceProvided) checks.push("Gold purchase invoice marked as available.");
     if (!gp.invoiceProvided) checks.push("Invoice marked as not available – may be reviewed at branch discretion.");
+    if (gp.invoiceFile) checks.push("Invoice copy uploaded (demo file capture).");
+    if (gp.purityCertificateFile) checks.push("Purity certificate uploaded (demo file capture).");
 
     const purityFactor = PURITY_FACTOR[Number(fin.purityKarat)] ?? (Number(fin.purityKarat) / 24);
     const weight = Number(fin.goldWeightGrams || 0);
@@ -405,6 +519,10 @@ export function renderApply(root) {
         checks,
       };
       st.application.emiLockedFromEstimate = false;
+      // Clear verification state once we reach estimate.
+      st.application.verification.status = "idle";
+      st.application.verification.messages = [];
+      st.application.verification.startedAt = null;
       return st;
     });
 

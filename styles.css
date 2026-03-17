@@ -39,6 +39,15 @@ a{color:inherit;text-decoration:none}
 }
 .topbar__inner{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 18px}
 .brand{display:flex; align-items:center; gap:10px; min-width:240px}
+.brand__logo{
+  height: 34px;
+  width: auto;
+  display:block;
+  border-radius:10px;
+  background: rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.25);
+  padding:6px 8px;
+}
 .brand__mark{
   font-weight:800;
   letter-spacing:.5px;

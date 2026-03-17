@@ -63,7 +63,9 @@ export function renderHome(root) {
           el("div", { class: "muted" }, [
             s.goldApi?.source === "goldpricez"
               ? `Rates refreshed automatically from demo gold-price API on ${s.goldApi.lastUpdatedDate || "latest"} (non-production).`
-              : "Using bundled demo rates. Connect your own HDBFS-approved rate API in code for live production pricing.",
+              : s.goldApi?.source === "metals.live+fx"
+                ? `Rates refreshed automatically once per day on ${s.goldApi.lastUpdatedDate || "latest"} using public market feeds (demo).`
+                : "Using bundled demo rates. Connect your own HDBFS-approved rate API in code for live production pricing.",
           ]),
           el("label", {}, [
             "Loan-to-value (LTV) % – configurable as per policy",

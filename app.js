@@ -4,12 +4,14 @@ import { renderApply } from "./src/routes/apply.js";
 import { renderCalculator } from "./src/routes/calculator.js";
 import { createChat } from "./src/chat/chat.js";
 import { storage } from "./src/lib/storage.js";
+import { refreshGoldPriceFromApiIfPossible } from "./src/lib/goldApi.js";
 
 const routeRoot = document.getElementById("routeRoot");
 const year = document.getElementById("year");
 year.textContent = String(new Date().getFullYear());
 
 storage.ensureDefaults();
+refreshGoldPriceFromApiIfPossible();
 
 const router = createRouter(routeRoot, {
   "/": renderHome,

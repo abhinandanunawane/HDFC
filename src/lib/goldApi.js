@@ -77,10 +77,14 @@ export async function refreshGoldPriceFromApiIfPossible() {
     };
 
     let gramInInr = 0;
+    let sourceUsed = "";
     try {
       gramInInr = await tryRefreshFromKeylessSources();
+      sourceUsed = "metals.live+fx";
     } catch {
-      gramInInr = (await tryRefreshFromGoldpricez()) || 0;
+      const gp = await tryRefreshFromGoldpricez();
+      gramInInr = gp || 0;
+      if (gp) sourceUsed = "goldpricez";
     }
     if (!Number.isFinite(gramInInr) || gramInInr <= 0) return;
 
@@ -88,7 +92,7 @@ export async function refreshGoldPriceFromApiIfPossible() {
       s.goldPricePerGram24k = Math.round(gramInInr);
       s.goldApi = {
         lastUpdatedDate: today,
-        source: gramInInr ? (GOLDPRICEZ_API_KEY ? "goldpricez" : "metals.live+fx") : s.goldApi?.source,
+        source: sourceUsed || s.goldApi?.source,
       };
       return s;
     });

@@ -11,6 +11,42 @@ const PURITY_FACTOR = {
 
 export function renderApply(root) {
   const s = storage.load();
+  const lead = s.chat?.state?.lead || {};
+  const canEnterFromChat =
+    Boolean(s.chat?.state?.otpVerified) &&
+    Boolean(lead.firstName && lead.lastName && lead.place && lead.dob && lead.mobile);
+
+  // Hard guard: apply flow must start from chat (basic info + OTP).
+  if (!canEnterFromChat) {
+    clear(root);
+    toast("Please start in chat and verify your mobile to continue.");
+    root.appendChild(
+      el("section", { class: "grid", style: "padding: 18px 0" }, [
+        el("div", { class: "card" }, [
+          el("div", { class: "card__inner" }, [
+            el("h1", { class: "card__title", text: "Start from chat to continue" }),
+            el("p", {
+              class: "muted",
+              text: "For this demo, the Gold Loan Estimate journey starts inside the chat. Please share basic details and verify your mobile number (OTP).",
+            }),
+            el("div", { class: "actions" }, [
+              el(
+                "button",
+                {
+                  class: "btn btn--primary",
+                  type: "button",
+                  onClick: () => document.getElementById("openChatBtn")?.click(),
+                },
+                ["Open chat"]
+              ),
+              el("a", { class: "btn", href: "#/" }, ["Go to Home"]),
+            ]),
+          ]),
+        ]),
+      ])
+    );
+    return;
+  }
 
   const header = el("section", { class: "hero", style: "padding-bottom: 0" }, [
     el("div", { class: "hero__banner" }, [
@@ -18,11 +54,11 @@ export function renderApply(root) {
         el("div", {}, [
           el("h1", {
             class: "hero__headline",
-            text: "Start your HDFC Gold Loan journey – fully guided online",
+            text: "Start your HDBFS Gold Loan journey – fully guided online",
           }),
           el("div", {
             class: "muted",
-            text: "Share a few details, upload gold photos, and get an instant, HDFC-style indicative gold loan estimate – in just four simple steps.",
+            text: "Share a few details, upload gold photos, and get an instant, HDBFS-style indicative gold loan estimate – in just four simple steps.",
           }),
         ]),
         el("div", { style: "min-width:260px; flex:0 0 auto" }, [
@@ -97,6 +133,9 @@ export function renderApply(root) {
     const est = s2.application.estimation;
     const lead = s2.chat.state.lead;
 
+    const fullName =
+      (lead?.firstName || "") + (lead?.lastName ? ` ${lead.lastName}` : "");
+
     const purityFactor = PURITY_FACTOR[Number(fin.purityKarat)] ?? (Number(fin.purityKarat) / 24);
     const weight = Number(fin.goldWeightGrams || 0);
     const evaluated = weight > 0 ? weight * purityFactor * Number(s2.goldPricePerGram24k) : 0;
@@ -108,7 +147,7 @@ export function renderApply(root) {
     inner.appendChild(el("p", { class: "card__subtitle", text: "This updates as you fill the steps." }));
     inner.appendChild(
       el("div", { class: "statgrid" }, [
-        stat("Applicant", lead?.name ? lead.name : "Not provided (chat)"),
+        stat("Applicant", fullName.trim() ? fullName : "Not provided (chat)"),
         stat("Mobile", lead?.mobile ? `••••••${String(lead.mobile).slice(-4)}` : "Not verified"),
         stat("Gold weight", weight ? `${weight} g` : "—"),
         stat("Purity", fin.purityKarat ? `${fin.purityKarat}K` : "—"),
@@ -136,6 +175,7 @@ export function renderApply(root) {
   function renderStep0(inner) {
     const s2 = storage.load();
     const fin = s2.application.financial;
+    const lead = s2.chat.state.lead;
     inner.appendChild(el("h2", { class: "card__title", text: "Step 1 — Tell us about yourself & your gold" }));
     inner.appendChild(
       el("p", {
@@ -144,9 +184,20 @@ export function renderApply(root) {
       })
     );
 
+    const basic = el("div", { class: "stat", style: "margin-bottom:12px" }, [
+      el("div", { class: "stat__k", text: "Basic details (auto‑filled from chat)" }),
+      el("div", { class: "statgrid", style: "margin-top:8px" }, [
+        stat("First name", fin.firstName || "—"),
+        stat("Last name", fin.lastName || "—"),
+        stat("Place / City", lead?.place || fin.city || "—"),
+        stat("DOB", lead?.dob || "—"),
+      ]),
+    ]);
+
     const form = el("div", { class: "form" }, [
+      basic,
       el("div", { class: "row" }, [
-        labelInput("City (where you prefer to avail the loan)", fin.city, (v) => setFin({ city: v })),
+        labelInput("City (preferred branch city)", fin.city, (v) => setFin({ city: v })),
         labelSelect(
           "Employment",
           fin.employment,
@@ -238,12 +289,24 @@ export function renderApply(root) {
     );
 
     inner.appendChild(el("div", { class: "stat" }, [
-      el("div", { class: "stat__k", text: "Gold photo guidelines for faster approval" }),
-      el("div", { class: "muted", style: "margin-top:6px" }, [
-        el("div", { text: "1) Capture 3–4 angles of each ornament – front, back, side and clasp/chain if applicable." }),
-        el("div", { text: "2) Take a close-up photo of the hallmark purity stamp and any HUID / BIS marks – make sure they are sharp." }),
-        el("div", { text: "3) Use good daylight or bright white light, with a plain background and no blur or filters." }),
-        el("div", { text: "4) Add a clear photo of the original invoice (if available) for faster assessment." }),
+      el("div", { class: "stat__k", text: "Gold photo upload instructions" }),
+      el("div", { class: "tipsGrid" }, [
+        el("div", { class: "tipsCol tipsCol--good" }, [
+          el("div", { class: "tipsTitle", text: "DO THIS" }),
+          el("div", { class: "tipsItem", text: "Use natural light or bright white light for clear, sharp photos." }),
+          el("div", { class: "tipsItem", text: "Use a plain, clean background so only the jewellery stands out." }),
+          el("div", { class: "tipsItem", text: "Capture 3–4 angles of each ornament – front, back, side and clasp/chain if applicable." }),
+          el("div", { class: "tipsItem", text: "Zoom in on hallmark purity stamps and HUID / BIS marks so they are easy to read." }),
+          el("div", { class: "tipsItem", text: "Include the full item in at least one photo, and add a clear invoice photo if available." }),
+        ]),
+        el("div", { class: "tipsCol tipsCol--bad" }, [
+          el("div", { class: "tipsTitle", text: "AVOID THIS" }),
+          el("div", { class: "tipsItem", text: "Dark or dim photos where jewellery looks dull or unclear." }),
+          el("div", { class: "tipsItem", text: "Blurry images caused by movement or not focusing the camera." }),
+          el("div", { class: "tipsItem", text: "Busy or cluttered backgrounds that hide important details." }),
+          el("div", { class: "tipsItem", text: "Parts of the ornament cut off from the frame." }),
+          el("div", { class: "tipsItem", text: "Holding the camera too far away so hallmarks and design are not visible." }),
+        ]),
       ]),
     ]));
 
@@ -253,12 +316,10 @@ export function renderApply(root) {
       multiple: "multiple",
       onChange: (e) => {
         const files = Array.from(e.target.files || []);
-        storage.update((st) => {
-          st.application.goldPhotos.files = files.map((f) => ({ name: f.name, size: f.size, type: f.type }));
-          return st;
+        setGoldPhotos({
+          files: files.map((f) => ({ name: f.name, size: f.size, type: f.type })),
         });
         toast(`${files.length} image(s) selected`);
-        render();
       },
     });
 
@@ -280,15 +341,26 @@ export function renderApply(root) {
     ]);
     inner.appendChild(form);
 
-    const fileList = (gp.files?.length ?? 0)
+    const photoCount = gp.files?.length ?? 0;
+    const fileList = photoCount
       ? el("div", { class: "stat", style: "margin-top:12px" }, [
-          el("div", { class: "stat__k", text: "Selected gold photos" }),
+          el("div", { class: "stat__k", text: `Selected gold photos (${photoCount}/3)` }),
           el("div", { class: "muted", style: "margin-top:6px" }, [
             ...gp.files.map((f) => el("div", { text: `- ${f.name}` })),
           ]),
         ])
       : el("div", { class: "muted", style: "margin-top:10px", text: "No images selected yet. Upload at least 3 clear images to continue." });
     inner.appendChild(fileList);
+
+    if (photoCount > 0 && photoCount < 3) {
+      inner.appendChild(
+        el("div", {
+          class: "muted",
+          style: "margin-top:10px",
+          text: `Upload ${3 - photoCount} more clear photo(s) to enable “Review gold loan estimate”.`,
+        })
+      );
+    }
 
     const act = actions({
       canPrev: true,

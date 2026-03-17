@@ -76,9 +76,15 @@ function updateLead(patch) {
 function resetChatForNewLead() {
   storage.update((s) => {
     s.chat.state.phase = "faq";
-    s.chat.state.lead = { name: "", dob: "", mobile: "" };
+    s.chat.state.lead = { firstName: "", lastName: "", place: "", dob: "", mobile: "" };
     s.chat.state.otp = null;
     s.chat.state.otpVerified = false;
+    s.chat.messages = [];
+
+    // Also reset application entry so the journey restarts cleanly.
+    s.application.started = false;
+    s.application.step = 0;
+    s.application.emiLockedFromEstimate = false;
     return s;
   });
 }
@@ -118,10 +124,7 @@ function promptStart(bodyEl, onNavigate) {
 
 function promptPersonalInfo(bodyEl) {
   setChatState({ phase: "collecting" });
-  sendBot(
-    bodyEl,
-    "Please share these details (one by one):\n1) Full Name\n2) Date of Birth (DD/MM/YYYY)\n3) Mobile Number"
-  );
+  sendBot(bodyEl, "To generate your Gold Loan Estimate, please share your First Name.");
 }
 
 function promptOtp(bodyEl) {
@@ -136,29 +139,41 @@ function promptOtp(bodyEl) {
 function finishAndRedirect(bodyEl, onNavigate) {
   setChatState({ phase: "verified", otpVerified: true });
   storage.update((s) => {
+    const lead = s.chat.state.lead || {};
+    s.application.financial.firstName = lead.firstName || "";
+    s.application.financial.lastName = lead.lastName || "";
+    // Autofill city from chat "Place"
+    if (lead.place) s.application.financial.city = lead.place;
     s.application.started = true;
     s.application.step = 0;
     return s;
   });
-  sendBot(
-    bodyEl,
-    "Mobile verified. Great — I’m taking you to the application steps now.",
-    [
-      {
-        label: "Go to Apply",
-        onClick: () => onNavigate("/apply"),
-      },
-    ]
-  );
-  onNavigate("/apply");
+  sendBot(bodyEl, "Mobile verified. Would you like to start your Gold Loan Estimate now?", [
+    {
+      label: "Start Gold Loan Estimate",
+      onClick: () => onNavigate("/apply"),
+    },
+  ]);
 }
 
 function handleCollecting(bodyEl, text) {
   const s = storage.load();
   const lead = s.chat.state.lead;
 
-  if (!lead.name) {
-    updateLead({ name: text });
+  if (!lead.firstName) {
+    updateLead({ firstName: text });
+    sendBot(bodyEl, "Thanks. Now share your Last Name.");
+    return;
+  }
+
+  if (!lead.lastName) {
+    updateLead({ lastName: text });
+    sendBot(bodyEl, "Great. Now share your Place / City.");
+    return;
+  }
+
+  if (!lead.place) {
+    updateLead({ place: text });
     sendBot(bodyEl, "Thanks. Now share your Date of Birth (DD/MM/YYYY).");
     return;
   }
@@ -237,15 +252,9 @@ function handleUserText(bodyEl, onNavigate, rawText) {
   // FAQ mode
   const answer = answerGoldLoanFaq(text, getCtxFromStorage());
   sendBot(bodyEl, answer, [
-    { label: "Start application", onClick: () => promptStart(bodyEl, onNavigate) },
-    { label: "EMI calculator", onClick: () => onNavigate("/calculator") },
-    { label: "Apply now", onClick: () => onNavigate("/apply") },
+    { label: "Get Gold Loan Estimate", onClick: () => promptStart(bodyEl, onNavigate) },
+    { label: "Gold Loan EMI Calculator", onClick: () => onNavigate("/calculator") },
   ]);
-
-  // After a helpful answer, offer to start if user intent looks like applying
-  if (/(apply|start|proceed|process|get loan|need loan)/i.test(text)) {
-    promptStart(bodyEl, onNavigate);
-  }
 }
 
 export function createChat({ openBtn, closeBtn, overlay, panel, body, form, input, onNavigate }) {
@@ -268,6 +277,14 @@ export function createChat({ openBtn, closeBtn, overlay, panel, body, form, inpu
   closeBtn?.addEventListener("click", () => close());
   overlay?.addEventListener("click", () => close());
 
+  const resetBtn = document.getElementById("resetChatBtn");
+  resetBtn?.addEventListener("click", () => {
+    resetChatForNewLead();
+    toast("Chat reset");
+    location.hash = "#/";
+    location.reload();
+  });
+
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = input.value;
@@ -280,9 +297,9 @@ export function createChat({ openBtn, closeBtn, overlay, panel, body, form, inpu
   if (!s.chat.messages.length) {
     sendBot(
       body,
-      "Hi! I’m your HDFC Gold Loan Smart Assistant.\nAsk me anything about online gold loan process, interest rates, eligibility, charges, timelines, documents or EMIs."
+      "Hi! I’m your HDBFS Gold Loan Smart Assistant.\nAsk me anything about the online gold loan process, interest rates, eligibility, charges, timelines, documents or EMIs."
     );
-    sendBot(body, "Would you like to get an instant HDFC-style gold loan estimate now?", [
+    sendBot(body, "Would you like to get an instant gold loan estimate now?", [
       { label: "Yes, start", onClick: () => handleUserText(body, navigate, "yes") },
       { label: "Not now", onClick: () => handleUserText(body, navigate, "no") },
     ]);
@@ -299,10 +316,6 @@ export function createChat({ openBtn, closeBtn, overlay, panel, body, form, inpu
   const chips = el("div", { class: "chiprow" }, [
     el("button", { class: "chip", type: "button", onClick: () => navigate("/calculator") }, [
       "Open EMI calculator",
-    ]),
-    el("button", { class: "chip", type: "button", onClick: () => navigate("/apply") }, ["Go to Apply"]),
-    el("button", { class: "chip", type: "button", onClick: () => { resetChatForNewLead(); toast("Chat reset"); location.reload(); } }, [
-      "Reset chat",
     ]),
   ]);
   body.appendChild(chips);

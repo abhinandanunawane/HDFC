@@ -12,7 +12,9 @@ const defaults = {
     state: {
       phase: "faq", // faq | askStart | collecting | otp | verified | applying
       lead: {
-        name: "",
+        firstName: "",
+        lastName: "",
+        place: "",
         dob: "",
         mobile: "",
       },
@@ -24,6 +26,8 @@ const defaults = {
     started: false,
     step: 0,
     financial: {
+      firstName: "",
+      lastName: "",
       city: "",
       employment: "Salaried",
       monthlyIncome: "",

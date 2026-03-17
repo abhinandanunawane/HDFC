@@ -15,11 +15,11 @@ export function renderHome(root) {
         el("div", {}, [
           el("h1", {
             class: "hero__headline",
-            text: "HDFC Gold Loan – instant online estimate & EMI in minutes",
+            text: "HDBFS Gold Loan – instant online estimate & EMI in minutes",
           }),
           el("div", {
             class: "muted",
-            text: "Check your HDFC-style gold loan eligibility online, get a smart gold value estimate, and explore flexible EMIs – all in one guided experience.",
+            text: "Check your HDBFS-style gold loan eligibility online, get a smart gold value estimate, and explore flexible EMIs – all in one guided experience.",
           }),
           el("div", { class: "hero__kpis" }, [
             el("div", { class: "pill" }, [
@@ -41,27 +41,6 @@ export function renderHome(root) {
             ]),
           ]),
         ]),
-        el("div", { style: "min-width:260px; flex:0 0 auto" }, [
-          el(
-            "a",
-            {
-              class: "btn btn--primary",
-              href: "#/apply",
-              style: "display:inline-block; width:100%; text-align:center",
-            },
-            ["Get instant gold loan estimate"]
-          ),
-          el("div", { style: "height:10px" }),
-          el(
-            "a",
-            {
-              class: "btn",
-              href: "#/calculator",
-              style: "display:inline-block; width:100%; text-align:center",
-            },
-            ["Explore EMI options"]
-          ),
-        ]),
       ]),
     ]),
   ]);
@@ -69,10 +48,10 @@ export function renderHome(root) {
   const configCard = el("section", { class: "grid grid--2" }, [
     el("div", { class: "card" }, [
       el("div", { class: "card__inner" }, [
-        el("h2", { class: "card__title", text: "Gold valuation – powered by live prices (demo)" }),
+        el("h2", { class: "card__title", text: "Gold valuation (demo)" }),
         el("p", {
           class: "card__subtitle",
-          text: "These indicative prices drive your gold value estimate and eligible loan. In production, this would be wired to HDFC-approved live rate feeds and policies.",
+          text: "These indicative prices drive your gold value estimate and eligible loan. In production, this should be wired to HDBFS-approved live rate feeds and policies.",
         }),
         el("div", { class: "form" }, [
           el("div", { class: "statgrid" }, [
@@ -84,7 +63,7 @@ export function renderHome(root) {
           el("div", { class: "muted" }, [
             s.goldApi?.source === "goldpricez"
               ? `Rates refreshed automatically from demo gold-price API on ${s.goldApi.lastUpdatedDate || "latest"} (non-production).`
-              : "Using bundled demo rates. Connect your own HDFC-approved rate API in code for live production pricing.",
+              : "Using bundled demo rates. Connect your own HDBFS-approved rate API in code for live production pricing.",
           ]),
           el("label", {}, [
             "Loan-to-value (LTV) % – configurable as per policy",
@@ -120,13 +99,13 @@ export function renderHome(root) {
     ]),
     el("div", { class: "card" }, [
       el("div", { class: "card__inner" }, [
-        el("h2", { class: "card__title", text: "Your end‑to‑end HDFC gold loan journey (demo)" }),
+        el("h2", { class: "card__title", text: "Your end‑to‑end gold loan journey (demo)" }),
         el("p", {
           class: "card__subtitle",
-          text: "Experience how a fully digital HDFC Gold Loan flow can look – from discovery and guidance to online estimation and EMI planning.",
+          text: "Experience how a fully digital gold loan flow can look – from discovery and guidance to online estimation and EMI planning.",
         }),
         el("div", { class: "statgrid" }, [
-          stat("Smart gold loan chat", "Ask anything about HDFC-style gold loans, then get guided into the journey."),
+          stat("Smart gold loan chat", "Ask anything about gold loans, then get guided into the journey."),
           stat("Instant online pre‑assessment", "Four clear steps from basic details to estimated eligible amount."),
           stat("Digital gold valuation (demo)", "Use live‑linked rates and purity to estimate your gold value."),
           stat("Gold loan EMI planner", "See EMIs instantly for different tenures and rates before you walk into a branch."),

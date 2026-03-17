@@ -29,12 +29,33 @@ export function renderCalculator(root) {
   const outputEmi = el("div", { class: "calc__value" });
   const outputInterest = el("div", { class: "stat__v" });
   const outputTotal = el("div", { class: "stat__v" });
+  const pie = el("div", { class: "emiPie" });
+  const pieCenter = el("div", { class: "emiPie__center" }, [
+    el("div", { class: "emiPie__label", text: "Principal" }),
+    el("div", { class: "emiPie__value" }),
+  ]);
+  pie.appendChild(pieCenter);
+  const piePrincipalLabel = pieCenter.querySelector(".emiPie__value");
+
+  const legendInterestValue = el("span", { class: "emiPieLegend__value" });
+  const legendPrincipalValue = el("span", { class: "emiPieLegend__value" });
 
   function rerender() {
     const { emi, interest, total } = calcEmi(amount, rate, tenure);
     outputEmi.textContent = inr(Math.round(emi));
     outputInterest.textContent = inr(Math.round(interest));
     outputTotal.textContent = inr(Math.round(total));
+
+     const principal = amount;
+     const totalPie = principal + interest;
+     const interestDeg = totalPie > 0 ? (interest / totalPie) * 360 : 0;
+     const interestPct = totalPie > 0 ? Math.round((interest / totalPie) * 100) : 0;
+     const principalPct = totalPie > 0 ? 100 - interestPct : 0;
+
+     pie.style.backgroundImage = `conic-gradient(var(--accent) 0 ${interestDeg}deg, var(--hdbfs-blue-light) ${interestDeg}deg 360deg)`;
+     piePrincipalLabel.textContent = inr(Math.round(principal));
+     legendInterestValue.textContent = `${interestPct}%`;
+     legendPrincipalValue.textContent = `${principalPct}%`;
   }
 
   const amountControl = lockedFromEstimate
@@ -69,7 +90,7 @@ export function renderCalculator(root) {
           class: "card__subtitle",
           text: lockedFromEstimate
             ? "Your loan amount is picked from the gold loan estimate. Adjust interest rate and tenure to see easy monthly EMIs."
-            : "Choose a loan amount, interest rate and tenure to simulate HDFC-style gold loan EMIs (demo).",
+            : "Choose a loan amount, interest rate and tenure to simulate HDBFS-style gold loan EMIs (demo).",
         }),
         el("div", { class: "calc__grid" }, [
           amountControl,
@@ -105,10 +126,24 @@ export function renderCalculator(root) {
         el("h2", { class: "card__title", text: "Your EMI snapshot" }),
         el("p", {
           class: "card__subtitle",
-          text: "Indicative monthly EMI based on your choices. Exact figures depend on final HDFC Gold Loan offer and charges.",
+          text: "Indicative monthly EMI based on your choices. Exact figures depend on the final offer and applicable charges.",
         }),
         el("div", { class: "muted", text: "Estimated monthly EMI" }),
         outputEmi,
+        el("div", { class: "hr" }),
+        pie,
+        el("div", { class: "emiPieLegend" }, [
+          el("div", { class: "emiPieLegend__row" }, [
+            el("span", { class: "emiPieLegend__dot emiPieLegend__dot--interest" }),
+            el("span", { class: "emiPieLegend__label", text: "Interest portion" }),
+            legendInterestValue,
+          ]),
+          el("div", { class: "emiPieLegend__row" }, [
+            el("span", { class: "emiPieLegend__dot emiPieLegend__dot--principal" }),
+            el("span", { class: "emiPieLegend__label", text: "Principal portion" }),
+            legendPrincipalValue,
+          ]),
+        ]),
         el("div", { class: "hr" }),
         el("div", { class: "statgrid" }, [
           el("div", { class: "stat" }, [
@@ -122,7 +157,7 @@ export function renderCalculator(root) {
         ]),
         el("div", { class: "hr" }),
         el("div", { class: "muted" }, [
-          "For live HDFC journeys, connect this planner to product‑wise rate grids, charges and taxes for exact EMI outputs.",
+          "For live journeys, connect this planner to product‑wise rate grids, charges and taxes for exact EMI outputs.",
         ]),
       ]),
     ]),

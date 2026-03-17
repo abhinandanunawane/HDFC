@@ -104,9 +104,9 @@ function sendUser(bodyEl, text) {
   persistMessage("user", text);
 }
 
-function promptStart(bodyEl) {
-  // User already expressed intent to start, so begin collecting immediately.
-  promptPersonalInfo(bodyEl);
+function promptStart(bodyEl, onNavigate) {
+  // Start intent should appear in message history for consistency.
+  handleUserText(bodyEl, onNavigate, "yes");
 }
 
 function promptPersonalInfo(bodyEl) {
@@ -247,7 +247,7 @@ function handleUserText(bodyEl, onNavigate, rawText) {
   }
   const answer = answerGoldLoanFaq(text, getCtxFromStorage());
   sendBot(bodyEl, answer, [
-    { label: "Get Gold Loan Estimate", onClick: () => promptStart(bodyEl) },
+    { label: "Get Gold Loan Estimate", onClick: () => promptStart(bodyEl, onNavigate) },
     { label: "Gold Loan EMI Calculator", onClick: () => onNavigate("/calculator") },
   ]);
 }
@@ -295,7 +295,7 @@ export function createChat({ openBtn, closeBtn, overlay, panel, body, form, inpu
       "Hi! I’m your HDBFS Gold Loan Smart Assistant.\nAsk me anything about the online gold loan process, interest rates, eligibility, charges, timelines, documents or EMIs."
     );
     sendBot(body, "Would you like to get an instant gold loan estimate now?", [
-      { label: "Yes, start", onClick: () => promptPersonalInfo(body) },
+      { label: "Yes, start", onClick: () => handleUserText(body, navigate, "yes") },
       { label: "Not now", onClick: () => handleUserText(body, navigate, "no") },
     ]);
   } else {
